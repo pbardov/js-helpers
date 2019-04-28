@@ -14,6 +14,22 @@ const depthOf = (val, start = 0) => {
   return level;
 };
 
+function deepFreeze(obj) {
+  // Получаем имена свойств из объекта obj
+  const propNames = Object.getOwnPropertyNames(obj);
+
+  // Замораживаем свойства для заморозки самого объекта
+  propNames.forEach((name) => {
+    const prop = obj[name];
+
+    // Заморозка свойства prop, если оно объект
+    if (typeof prop === 'object' && prop !== null) deepFreeze(prop);
+  });
+
+  // Заморозить сам объект obj (ничего не произойдёт, если он уже заморожен)
+  return Object.freeze(obj);
+}
+
 module.exports = {
   bindProto(that, proto) {
     const nproto = {};
@@ -111,5 +127,7 @@ module.exports = {
     });
 
     return result.tree;
-  }
+  },
+
+  deepFreeze
 };
