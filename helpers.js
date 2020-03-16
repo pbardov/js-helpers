@@ -1,11 +1,11 @@
 /* eslint-disable no-multi-assign */
-const _ = require('lodash');
+const _ = require("lodash");
 
 const depthOf = (val, start = 0) => {
   let level = start;
 
-  _.each(val, (v) => {
-    if (typeof v === 'object') {
+  _.each(val, v => {
+    if (typeof v === "object") {
       const depth = depthOf(v, level + 1);
       level = Math.max(depth, level);
     }
@@ -19,11 +19,11 @@ function deepFreeze(obj) {
   const propNames = Object.getOwnPropertyNames(obj);
 
   // Замораживаем свойства для заморозки самого объекта
-  propNames.forEach((name) => {
+  propNames.forEach(name => {
     const prop = obj[name];
 
     // Заморозка свойства prop, если оно объект
-    if (typeof prop === 'object' && prop !== null) deepFreeze(prop);
+    if (typeof prop === "object" && prop !== null) deepFreeze(prop);
   });
 
   // Заморозить сам объект obj (ничего не произойдёт, если он уже заморожен)
@@ -43,7 +43,9 @@ function difference(object, base) {
       if (!_.isEqual(value, base[key])) {
         // eslint-disable-next-line
         result[key] =
-          _.isObject(value) && _.isObject(base[key]) ? changes(value, base[key]) : value;
+          _.isObject(value) && _.isObject(base[key])
+            ? changes(value, base[key])
+            : value;
       }
     });
   }
@@ -85,7 +87,7 @@ module.exports = {
 
   toPlainObject(obj) {
     let res;
-    if (obj.toJSON && typeof obj.toJSON === 'function') {
+    if (obj.toJSON && typeof obj.toJSON === "function") {
       res = _.assign({}, obj.toJSON());
     } else {
       res = _.assign({}, obj);
@@ -99,13 +101,14 @@ module.exports = {
     const digitRe = /^(\d+)$/;
     const result = {};
     _.each(flat, (v, k) => {
-      const paths = `${k}`.split('.');
+      const paths = `${k}`.split(".");
       let node = result;
-      let nodeName = 'tree';
+      let nodeName = "tree";
       let n = 0;
       do {
         const newNodeName = paths[n];
-        const newNodeType = newNodeName.search(digitRe) >= 0 ? 'array' : 'object';
+        const newNodeType =
+          newNodeName.search(digitRe) >= 0 ? "array" : "object";
         let newNode;
 
         if (node instanceof Array) {
@@ -114,13 +117,15 @@ module.exports = {
             if (node.length <= ai) {
               node.length = ai + 1;
             }
-            newNode = node[ai] = node[ai] || (newNodeType === 'array' ? [] : {});
+            newNode = node[ai] =
+              node[ai] || (newNodeType === "array" ? [] : {});
           } else {
             // wrong parent
             return;
           }
         } else {
-          newNode = node[nodeName] = node[nodeName] || (newNodeType === 'array' ? [] : {});
+          newNode = node[nodeName] =
+            node[nodeName] || (newNodeType === "array" ? [] : {});
         }
 
         node = newNode;
@@ -150,5 +155,22 @@ module.exports = {
   },
 
   deepFreeze,
-  difference
+  difference,
+
+  disposer(args, cleanup, cleanupArgs = []) {
+    return async worker => {
+      let error;
+      let result;
+      try {
+        result = await worker(...args);
+      } catch (err) {
+        error = err;
+      }
+      await cleanup(...cleanupArgs);
+      if (error) {
+        throw error;
+      }
+      return result;
+    };
+  }
 };
