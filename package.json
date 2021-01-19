@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@repo.vsgsoft.com:js-helpers"
+    "url": "git@github.com:pbardov/js-helpers.git"
   },
   "author": "Pavel Bardov",
   "license": "MIT",
